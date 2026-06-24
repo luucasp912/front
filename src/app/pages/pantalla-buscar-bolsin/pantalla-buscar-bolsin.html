@@ -233,7 +233,7 @@
 
       @if (bolsinSeleccionado) {
         <div class="bolsin-detalle-card">
-          <div class="bolsin-detalle-header">
+          <div class="bolsin-detalle-header d-flex align-items-center gap-3">
             <span class="bolsin-numero">Bolsín #{{ bolsinSeleccionado.numeroBolsin }}</span>
             <span class="badge bg-success">{{ bolsinSeleccionado.cmDestino.getNombre() }}</span>
           </div>
@@ -269,7 +269,7 @@
             <pre class="datos-gps-pre">{{ datosFormateados }}</pre>
           </div>
 
-          <div class="detalle-acciones mt-3">
+          <div class="detalle-acciones mt-3 d-flex justify-content-between">
             <button class="btn btn-outline-secondary" (click)="volverAlMapaDesdeDetalle()">
               <i class="bi bi-map me-1"></i>Volver al mapa
             </button>

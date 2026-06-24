@@ -36,12 +36,6 @@
   letter-spacing: -0.02em;
 }
 
-@media (max-width: 576px) {
-  .landing-title {
-    font-size: 2rem;
-  }
-}
-
 .landing-subtitle {
   font-size: 1.1rem;
   color: var(--gray-500);
@@ -70,13 +64,6 @@
   justify-content: center;
   gap: 2.5rem;
   margin-top: 3rem;
-}
-
-@media (max-width: 576px) {
-  .landing-features {
-    gap: 1.5rem;
-    flex-wrap: wrap;
-  }
 }
 
 .feature-item {

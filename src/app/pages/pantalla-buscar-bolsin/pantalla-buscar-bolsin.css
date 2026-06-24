@@ -238,12 +238,6 @@
   display: none;
 }
 
-@media (max-width: 576px) {
-  .mapa-container {
-    height: 300px;
-  }
-}
-
 /* Lista de bolsines */
 .bolsines-lista {
   margin-top: 0.5rem;
@@ -436,38 +430,3 @@
   }
 }
 
-/* Responsive */
-@media (max-width: 576px) {
-  .seguimiento-container {
-    padding: 1rem 0.75rem 6rem;
-  }
-
-  .seguimiento-title {
-    font-size: 1.15rem;
-  }
-
-  .bolsines-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .tracker-select-row {
-    flex-direction: column;
-  }
-
-  .tracker-select-row .form-select {
-    min-width: 100%;
-  }
-
-  .filtros-row {
-    flex-direction: column;
-  }
-
-  .filtro-group {
-    min-width: 100%;
-  }
-
-  .modal-contenido {
-    margin: 1rem;
-    max-width: 100%;
-  }
-}
