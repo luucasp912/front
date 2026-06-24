@@ -2,17 +2,17 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { GestorBuscarBolsin } from '../../services/gestor-buscar-bolsin';
-import { Bolsin } from '../../models/bolsin';
-import { ComisionMedica } from '../../models/comision-medica';
+import { GestorBuscarBolsin } from '../../backend/gestor/gestor-buscar-bolsin';
+import { Bolsin } from '../../backend/models/bolsin';
+import { ComisionMedica } from '../../backend/models/comision-medica';
 import {
   GPSTracker,
   XTR4500L,
   NavTrackQX7A,
   GeoPulseMTR900,
   GpsLocation,
-} from '../../models/gps-tracker';
-import { ServidorMapaLeaflet } from '../../models/servidor-google-map';
+} from '../../backend/models/gps-tracker';
+import { ServidorMapaLeaflet } from '../../backend/models/servidor-google-map';
 
 type Paso =
   | 'cargando'
@@ -116,7 +116,8 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // -- Selección de tracker y localización --
 
-  iniciarLocalizacion(): void {
+  // Helper para template (no pertenece al diagrama de análisis)
+  protected iniciarLocalizacion(): void {
     if (!this.trackerSeleccionado) return;
 
     let tracker: GPSTracker;
@@ -236,10 +237,16 @@ export class PantallaBuscarBolsin implements OnInit {
   pedirSeleccionBolsin(): void {
     (window as any).seleccionarBolsin = (numeroBolsin: number) => {
       const bolsin = this.bolsines.find((b) => b.numeroBolsin === numeroBolsin);
-      if (bolsin) this.procesarSeleccion(bolsin);
+      if (bolsin) this.tomarSeleccionBolsin(bolsin);
     };
   }
 
+  // Método público del diagrama: procesa la selección de un bolsín
+  tomarSeleccionBolsin(bolsin: Bolsin): void {
+    this.procesarSeleccion(bolsin);
+  }
+
+  // Implementación interna reutilizable
   private procesarSeleccion(bolsin: Bolsin): void {
     this.bolsinSeleccionado = bolsin;
     this.gestor.tomarSeleccionBolsin(bolsin);
@@ -253,12 +260,14 @@ export class PantallaBuscarBolsin implements OnInit {
     this.paso.set('detalleBolsin');
   }
 
-  seleccionarDesdeLista(numeroBolsin: number): void {
+  // Helper para template (no pertenece al diagrama de análisis)
+  protected seleccionarDesdeLista(numeroBolsin: number): void {
     const bolsin = this.bolsines.find((b) => b.numeroBolsin === numeroBolsin);
     if (bolsin) this.procesarSeleccion(bolsin);
   }
 
-  volverAlMapaDesdeDetalle(): void {
+  // Helper para template (no pertenece al diagrama de análisis)
+  protected volverAlMapaDesdeDetalle(): void {
     this.bolsinSeleccionado = null;
     this.datosFormateados = '';
     this.paso.set('mapa');
@@ -269,10 +278,7 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // ========== Confirmación de envío de correo ==========
 
-  abrirDialogoEmail(): void {
-    this.paso.set('emailDialog');
-  }
-
+  // Método del diagrama: abre el diálogo de confirmación
   pedirConfirmacionEnvioCorreo(): void {
     if (!this.bolsinSeleccionado) return;
     this.paso.set('emailDialog');
@@ -308,14 +314,15 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // ========== Alternativas ==========
 
-  cancelar(): void {
+  // Helper para template (no pertenece al diagrama de análisis)
+  protected cancelar(): void {
     this.gestor.finCU();
     this.router.navigate(['/']);
   }
 
-  // ========== Filtros ==========
+  // ========== Filtros (no pertenecen al diagrama de análisis) ==========
 
-  get bolsinesFiltrados(): Bolsin[] {
+  protected get bolsinesFiltrados(): Bolsin[] {
     return this.bolsines.filter((b) => {
       const matchPrecinto =
         !this.filtroPrecinto ||
@@ -327,23 +334,23 @@ export class PantallaBuscarBolsin implements OnInit {
     });
   }
 
-  get hayResultadosFiltro(): boolean {
+  protected get hayResultadosFiltro(): boolean {
     return this.bolsinesFiltrados.length > 0;
   }
 
-  hayErrorFiltro = false;
+  protected hayErrorFiltro = false;
 
-  aplicarFiltro(): void {
+  protected aplicarFiltro(): void {
     this.hayErrorFiltro = !this.hayResultadosFiltro;
   }
 
-  limpiarFiltro(): void {
+  protected limpiarFiltro(): void {
     this.filtroPrecinto = '';
     this.filtroCMDestino = '';
     this.hayErrorFiltro = false;
   }
 
-  getDestinos(): string[] {
+  protected getDestinos(): string[] {
     return [...new Set(this.bolsines.map((b) => b.cmDestino.getNombre()))];
   }
 }
