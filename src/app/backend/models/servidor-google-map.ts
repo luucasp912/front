@@ -64,4 +64,15 @@ export class ServidorMapaLeaflet implements ServidorGoogleMap {
       popupAnchor: [0, -16],
     });
   }
+
+  // Ícono tipo pin para Comisiones Médicas
+  crearIconoCM(color: string): any {
+    return L.divIcon({
+      className: 'marcador-cm',
+      html: `<div style="background:${color};width:32px;height:32px;border-radius:8px 8px 8px 2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);transform:rotate(45deg);margin-bottom:8px"><i class="bi bi-building" style="transform:rotate(-45deg)"></i></div>`,
+      iconSize: [32, 40],
+      iconAnchor: [16, 36],
+      popupAnchor: [0, -36],
+    });
+  }
 }

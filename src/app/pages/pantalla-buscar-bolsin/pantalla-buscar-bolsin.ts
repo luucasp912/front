@@ -14,6 +14,7 @@ import {
 } from '../../backend/models/gps-tracker';
 import { ServidorMapaLeaflet } from '../../backend/models/servidor-google-map';
 
+// Estados de la UI interna (no pertenecen al diagrama de análisis)
 type Paso =
   | 'cargando'
   | 'cmInfo'
@@ -33,6 +34,8 @@ type Paso =
   templateUrl: './pantalla-buscar-bolsin.html',
   styleUrl: './pantalla-buscar-bolsin.css',
 })
+
+// PantallaBuscarBolsin: boundary class del CU 36 "Consultar seguimiento de bolsines"
 export class PantallaBuscarBolsin implements OnInit {
   private router = inject(Router);
   private gestor = inject(GestorBuscarBolsin);
@@ -74,6 +77,7 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // ========== Métodos del diagrama de clases ==========
 
+  // CU 36 paso 1: el EB selecciona la opción para consultar ubicación de bolsines
   opcConsultarUbiBolsin(): void {
     this.paso.set('cargando');
     try {
@@ -85,10 +89,12 @@ export class PantallaBuscarBolsin implements OnInit {
     }
   }
 
+  // CU 36 paso 2: el sistema habilita la ventana
   habilitarVentana(): void {
     this.mostrarCMUsuarioLog();
   }
 
+  // CU 36 paso 3: el sistema busca y muestra la CM del usuario logueado
   mostrarCMUsuarioLog(): void {
     try {
       this.cmOrigen = this.gestor.buscarCMUsuarioLogueado();
@@ -99,6 +105,8 @@ export class PantallaBuscarBolsin implements OnInit {
     }
   }
 
+  // Busca los bolsines en estado Enviado para la CM origen
+  // A1: No se encuentran bolsines en estado Enviado -> muestra pantalla vacía
   private buscarBolsines(): void {
     try {
       const encontrados = this.gestor.buscarBolsinesEnviados();
@@ -116,10 +124,12 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // -- Selección de tracker y localización --
 
+  // CU 36 paso 4-5: solicita al GPS Tracker la ubicación de los bolsines
   // Helper para template (no pertenece al diagrama de análisis)
   protected iniciarLocalizacion(): void {
     if (!this.trackerSeleccionado) return;
 
+    // Genera coordenadas simuladas entre CM origen y cada CM destino
     let tracker: GPSTracker;
     const coordsSimuladas = new Map<number, [number, number]>();
     const origen: [number, number] = [-31.4201, -64.1888];
@@ -131,6 +141,7 @@ export class PantallaBuscarBolsin implements OnInit {
       'CM-SFE': [-31.6333, -60.6967],
     };
 
+    // A3 (parcial): el bolsín 1006 simula falla del GPS
     this.bolsines
       .filter((b) => b.numeroBolsin !== 1006)
       .forEach((b) => {
@@ -141,6 +152,7 @@ export class PantallaBuscarBolsin implements OnInit {
         coordsSimuladas.set(b.numeroBolsin, [lat, lng]);
       });
 
+    // Crea instancia del tracker según el modelo seleccionado por el EB
     switch (this.trackerSeleccionado) {
       case 'XTR-4500L':
         tracker = new XTR4500L(coordsSimuladas);
@@ -160,6 +172,7 @@ export class PantallaBuscarBolsin implements OnInit {
     this.ubicaciones = new Map();
     this.erroresGPS = [];
 
+    // CU 36 paso 5: recibe datos de localización del dispositivo GPS
     this.gestor.obtenerUbicaciones(this.bolsines).then(
       (resultado) => {
         this.ubicaciones = resultado.ubicaciones;
@@ -181,6 +194,7 @@ export class PantallaBuscarBolsin implements OnInit {
     );
   }
 
+  // CU 36 paso 6: muestra sobre un mapa la posición de los bolsines
   mostrarBolsinLocation(): void {
     this.paso.set('mapa');
 
@@ -192,11 +206,13 @@ export class PantallaBuscarBolsin implements OnInit {
       const el = document.getElementById('mapa-bolsines');
       if (!el) return;
 
+      // Inicializa el mapa Leaflet (implementación de ServidorGoogleMap)
       this.servidorMapa = new ServidorMapaLeaflet('mapa-bolsines', [-31.4201, -64.1888], 6);
       this.servidorMapa.getMapa();
       this.mapaBolsines = this.servidorMapa;
       const sm = this.mapaValido;
 
+      // Agrega un marcador por cada bolsín localizado
       const colores = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
       let i = 0;
 
@@ -228,12 +244,14 @@ export class PantallaBuscarBolsin implements OnInit {
 
       sm.ajustarVista();
       this.mapaBolsines = sm;
+      // CU 36 paso 7: habilita la selección de un bolsín en el mapa
       this.pedirSeleccionBolsin();
     }, 300);
   }
 
   // ========== Selección de bolsín ==========
 
+  // CU 36 paso 7: el EB puede seleccionar un bolsín del mapa
   pedirSeleccionBolsin(): void {
     (window as any).seleccionarBolsin = (numeroBolsin: number) => {
       const bolsin = this.bolsines.find((b) => b.numeroBolsin === numeroBolsin);
@@ -241,12 +259,12 @@ export class PantallaBuscarBolsin implements OnInit {
     };
   }
 
-  // Método público del diagrama: procesa la selección de un bolsín
+  // CU 36 paso 7 (cont): el sistema procesa el bolsín seleccionado
   tomarSeleccionBolsin(bolsin: Bolsin): void {
     this.procesarSeleccion(bolsin);
   }
 
-  // Implementación interna reutilizable
+  // A3: el GPS no pudo informar la ubicación de este bolsín (simulado con ID 1006)
   private procesarSeleccion(bolsin: Bolsin): void {
     this.bolsinSeleccionado = bolsin;
     this.gestor.tomarSeleccionBolsin(bolsin);
@@ -278,12 +296,14 @@ export class PantallaBuscarBolsin implements OnInit {
 
   // ========== Confirmación de envío de correo ==========
 
-  // Método del diagrama: abre el diálogo de confirmación
+  // CU 36 paso 8: el sistema consulta si se desea enviar un correo al GCM destino
   pedirConfirmacionEnvioCorreo(): void {
     if (!this.bolsinSeleccionado) return;
     this.paso.set('emailDialog');
   }
 
+  // CU 36 paso 9: el EB confirma (o no) el envío del correo
+  // A5: el EB no confirma -> vuelve al mapa
   tomarConfirmacionEnvioCorreo(confirmado: boolean): void {
     this.confirmacionEnvioCorreo = confirmado;
     this.gestor.tomarConfEnvioCorreo(confirmado);
@@ -291,7 +311,9 @@ export class PantallaBuscarBolsin implements OnInit {
     if (confirmado) {
       this.paso.set('enviando');
       try {
+        // CU 36 paso 10: busca el email del GCM destino
         this.emailGcmDestino = this.gestor.buscarEmailGCM();
+        // CU 36 paso 11: incluye al CU 30 "Notificar ubicación de bolsín"
         this.infoNotificacion = this.gestor.llamarCUNotificarUbicacionDeBolsin();
         this.mostrarMensajeExito();
       } catch (e: any) {
@@ -299,6 +321,7 @@ export class PantallaBuscarBolsin implements OnInit {
         this.paso.set('error');
       }
     } else {
+      // A5: el EB cancela -> vuelve al mapa
       this.bolsinSeleccionado = null;
       this.datosFormateados = '';
       this.paso.set('mapa');
@@ -308,19 +331,22 @@ export class PantallaBuscarBolsin implements OnInit {
     }
   }
 
+  // CU 36 paso 11: muestra mensaje de ejecución exitosa
   mostrarMensajeExito(): void {
     this.paso.set('exito');
   }
 
   // ========== Alternativas ==========
 
+  // A4: el EB cancela el CU en cualquier momento
   // Helper para template (no pertenece al diagrama de análisis)
   protected cancelar(): void {
     this.gestor.finCU();
     this.router.navigate(['/']);
   }
 
-  // ========== Filtros (no pertenecen al diagrama de análisis) ==========
+  // ========== Filtros por precinto o CM destino (implementación, no del diagrama) ==========
+  // CU 36 paso 6 (cont): el sistema habilita filtrar por número de precinto o CM destino
 
   protected get bolsinesFiltrados(): Bolsin[] {
     return this.bolsines.filter((b) => {

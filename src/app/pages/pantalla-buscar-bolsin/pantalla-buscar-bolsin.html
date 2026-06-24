@@ -10,13 +10,13 @@
     </button>
   </div>
 
-  <!-- Mapa contenedor (siempre en DOM si ya se inicializó) -->
+  <!-- CU 36 paso 6: Mapa contenedor (siempre en DOM si ya se inicializó) -->
   @if (ubicaciones.size > 0) {
     <div id="mapa-bolsines" class="mapa-container"
          [class.mapa-oculto]="paso() !== 'mapa' && paso() !== 'emailDialog' && paso() !== 'exito'"></div>
   }
 
-  <!-- Loading -->
+  <!-- CU 36 paso 1-2: Cargando -->
   @if (paso() === 'cargando') {
     <div class="seguimiento-loading">
       <div class="spinner-border text-primary" role="status">
@@ -26,7 +26,7 @@
     </div>
   }
 
-  <!-- Vacío (A1) -->
+  <!-- A1: No hay bolsines en estado Enviado -->
   @if (paso() === 'vacio') {
     <div class="seguimiento-empty">
       <i class="bi bi-inbox"></i>
@@ -41,7 +41,7 @@
     </div>
   }
 
-  <!-- Error (A3) -->
+  <!-- Error general (A3 u otros) -->
   @if (paso() === 'error') {
     <div class="seguimiento-error">
       <i class="bi bi-exclamation-triangle"></i>
@@ -56,7 +56,7 @@
     </div>
   }
 
-  <!-- CM Info + Bolsines + Tracker -->
+  <!-- CU 36 paso 3-4: CM origen + bolsines encontrados + selección de GPS Tracker -->
   @if (paso() === 'cmInfo') {
     <div class="seguimiento-card">
       <div class="cm-info">
@@ -124,7 +124,7 @@
     </div>
   }
 
-  <!-- Localizando -->
+  <!-- CU 36 paso 5: Consultando GPS Tracker -->
   @if (paso() === 'localizando') {
     <div class="seguimiento-loading">
       <div class="spinner-border text-primary" role="status">
@@ -137,7 +137,7 @@
     </div>
   }
 
-  <!-- Mapa -->
+  <!-- CU 36 paso 6: Mapa con ubicaciones de bolsines + filtros -->
   @if (paso() === 'mapa') {
     <div class="seguimiento-card">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
@@ -185,7 +185,7 @@
         }
       </div>
 
-      <!-- Advertencia filtro sin resultados (A2) -->
+      <!-- A2: No se encuentra bolsín con el filtro ingresado -->
       @if (!hayResultadosFiltro && (filtroPrecinto || filtroCMDestino)) {
         <div class="alert alert-warning py-2 mt-2 mb-0" style="font-size:0.875rem">
           <i class="bi bi-exclamation-circle me-1"></i>
@@ -217,7 +217,7 @@
     </div>
   }
 
-  <!-- Detalle Bolsín -->
+  <!-- CU 36 paso 7: Detalle del bolsín seleccionado -->
   @if (paso() === 'detalleBolsin') {
     <div class="seguimiento-card">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
@@ -282,7 +282,7 @@
     </div>
   }
 
-  <!-- Error A3: GPS no pudo informar ubicación -->
+  <!-- A3: El GPS no pudo informar la ubicación del bolsín -->
   @if (paso() === 'a3Error') {
     <div class="seguimiento-card">
       <div class="a3-error-container">
@@ -309,7 +309,7 @@
     </div>
   }
 
-  <!-- Email Dialog (Paso 8-9) -->
+  <!-- CU 36 paso 8-9: Diálogo de confirmación de envío de correo -->
   @if (paso() === 'emailDialog') {
     <div class="modal-overlay" (click)="tomarConfirmacionEnvioCorreo(false)">
       <div class="modal-contenido" (click)="$event.stopPropagation()">
@@ -352,7 +352,7 @@
     </div>
   }
 
-  <!-- Enviando -->
+  <!-- CU 36 paso 10: Enviando notificación -->
   @if (paso() === 'enviando') {
     <div class="seguimiento-loading">
       <div class="spinner-border text-primary" role="status">
@@ -365,7 +365,7 @@
     </div>
   }
 
-  <!-- Éxito (Paso 11) -->
+  <!-- CU 36 paso 11: Notificación enviada con éxito -->
   @if (paso() === 'exito') {
     <div class="seguimiento-success">
       <i class="bi bi-check-circle-fill"></i>
