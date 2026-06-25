@@ -171,34 +171,6 @@
   text-align: right;
 }
 
-/* Tracker */
-.tracker-section {
-  border-top: 1px solid var(--gray-200);
-  padding-top: 1.25rem;
-}
-
-.tracker-desc {
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
-}
-
-.tracker-select-row {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.tracker-select-row .form-select {
-  flex: 1;
-  min-width: 200px;
-}
-
-.tracker-info-badge {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
 /* Filtros */
 .filtros-row {
   display: flex;

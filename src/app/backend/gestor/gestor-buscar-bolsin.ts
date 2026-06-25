@@ -121,14 +121,6 @@ export class GestorBuscarBolsin {
     return mapa[cmDestino.codigo] ?? [-31.4201, -64.1888];
   }
 
-  setTracker(tracker: GPSTracker): void {
-    this.tracker = tracker;
-  }
-
-  getTrackerModelo(): string {
-    return this.tracker?.modelo ?? '';
-  }
-
   nuevaBusquedaBolsin(): Usuario {
     const sesion = Sesion.getInstance();
     this.usuarioLogueado = sesion.buscarUsuarioLog();
@@ -151,7 +143,10 @@ export class GestorBuscarBolsin {
   }
 
   async obtenerUbicaciones(bolsines: Bolsin[]): Promise<ResultadoUbicaciones> {
-    if (!this.tracker) throw new Error('No hay tracker GPS configurado');
+    if (!this.tracker) {
+      const coordenadas = this.generarCoordenadasSimuladas(bolsines);
+      this.tracker = new XTR4500L(coordenadas);
+    }
 
     const ubicaciones = new Map<number, GpsLocation>();
     const errores: string[] = [];
@@ -267,6 +262,22 @@ export class GestorBuscarBolsin {
     this.confirmacionEnvioCorreo = false;
     this.mapaConBolsines = false;
     this.ubicacionBolsines.clear();
+  }
+
+  private generarCoordenadasSimuladas(bolsines: Bolsin[]): Map<number, [number, number]> {
+    const origen: [number, number] = [-31.4201, -64.1888];
+    const coords = new Map<number, [number, number]>();
+
+    bolsines.forEach((b) => {
+      if (b.numeroBolsin === 1006) return;
+      const destino = this.getCoordenadasDestino(b.cmDestino);
+      const factor = Math.random() * 0.3 + 0.35;
+      const lat = origen[0] + (destino[0] - origen[0]) * factor + (Math.random() - 0.5) * 0.8;
+      const lng = origen[1] + (destino[1] - origen[1]) * factor + (Math.random() - 0.5) * 0.8;
+      coords.set(b.numeroBolsin, [lat, lng]);
+    });
+
+    return coords;
   }
 
   private delay(ms: number): Promise<void> {
