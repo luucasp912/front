@@ -2,9 +2,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { GestorBuscarBolsin } from '../../backend/gestor/gestor-buscar-bolsin';
+import { GestorBuscarBolsin, InfoNotificacion } from '../../backend/gestor/gestor-buscar-bolsin';
 import { Bolsin } from '../../backend/models/bolsin';
 import { ComisionMedica } from '../../backend/models/comision-medica';
+import { Usuario } from '../../backend/models/usuario';
 import { GpsLocation } from '../../backend/models/gps-tracker';
 import { ServidorMapaLeaflet } from '../../backend/models/servidor-google-map';
 
@@ -34,24 +35,22 @@ export class PantallaBuscarBolsin implements OnInit {
   private gestor = inject(GestorBuscarBolsin);
 
   // -- Atributos de la clase del diagrama --
-  mapaBolsines: any = null;
+  mapaBolsines: ServidorMapaLeaflet | null = null;
   bolsinSeleccionado: Bolsin | null = null;
   confirmacionEnvioCorreo = false;
-  usuarioLogueado: any = null;
+  usuarioLogueado: Usuario | null = null;
 
   // -- Estado local --
   paso = signal<Paso>('cargando');
   cmOrigen: ComisionMedica | null = null;
   bolsines: Bolsin[] = [];
   ubicaciones: Map<number, GpsLocation> = new Map();
-  erroresGPS: string[] = [];
   errorMessage = '';
 
   // -- Controles --
   filtroPrecinto = '';
   filtroCMDestino = '';
-  emailGcmDestino = '';
-  infoNotificacion: any = null;
+  infoNotificacion: InfoNotificacion | null = null;
 
   // -- Mapa --
   private servidorMapa: ServidorMapaLeaflet | null = null;
@@ -117,12 +116,10 @@ export class PantallaBuscarBolsin implements OnInit {
   protected iniciarLocalizacion(): void {
     this.paso.set('localizando');
     this.ubicaciones = new Map();
-    this.erroresGPS = [];
 
     this.gestor.obtenerUbicaciones(this.bolsines).then(
       (resultado) => {
         this.ubicaciones = resultado.ubicaciones;
-        this.erroresGPS = resultado.errores;
 
         if (resultado.ubicaciones.size === 0) {
           this.errorMessage =
@@ -254,8 +251,6 @@ export class PantallaBuscarBolsin implements OnInit {
     if (confirmado) {
       this.paso.set('enviando');
       try {
-        // CU 36 paso 10: busca el email del GCM destino
-        this.emailGcmDestino = this.gestor.buscarEmailGCM();
         // CU 36 paso 11: incluye al CU 30 "Notificar ubicación de bolsín"
         this.infoNotificacion = this.gestor.llamarCUNotificarUbicacionDeBolsin();
         this.mostrarMensajeExito();
@@ -306,16 +301,12 @@ export class PantallaBuscarBolsin implements OnInit {
     return this.bolsinesFiltrados.length > 0;
   }
 
-  protected hayErrorFiltro = false;
-
   protected aplicarFiltro(): void {
-    this.hayErrorFiltro = !this.hayResultadosFiltro;
   }
 
   protected limpiarFiltro(): void {
     this.filtroPrecinto = '';
     this.filtroCMDestino = '';
-    this.hayErrorFiltro = false;
   }
 
   protected getDestinos(): string[] {
