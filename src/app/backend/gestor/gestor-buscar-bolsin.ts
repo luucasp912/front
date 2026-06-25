@@ -154,13 +154,6 @@ export class GestorBuscarBolsin {
     for (const b of bolsines) {
       await this.delay(400 + Math.random() * 300);
 
-      if (b.numeroBolsin === 1006) {
-        errores.push(
-          `El tracker ${this.tracker.modelo} no pudo informar la ubicación del bolsín #${b.numeroBolsin} (${b.cmDestino.getNombre()}).`,
-        );
-        continue;
-      }
-
       try {
         let loc: GpsLocation;
 
@@ -269,7 +262,6 @@ export class GestorBuscarBolsin {
     const coords = new Map<number, [number, number]>();
 
     bolsines.forEach((b) => {
-      if (b.numeroBolsin === 1006) return;
       const destino = this.getCoordenadasDestino(b.cmDestino);
       const factor = Math.random() * 0.3 + 0.35;
       const lat = origen[0] + (destino[0] - origen[0]) * factor + (Math.random() - 0.5) * 0.8;
